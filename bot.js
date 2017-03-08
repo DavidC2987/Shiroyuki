@@ -1,6 +1,6 @@
 const Eris = require("eris");
 
-var bot = new Eris("Mjg5MDI3Njk3NTE3MjY0ODk2.C6GZiw.RoMuaILocp2OnIT02Q8zPeg-Qvo"); //This is your discord bot token
+var bot = new Eris(""); //This is your discord bot token
 
 var request = require('request')
 var username = '' //enter in your {API Key} here
