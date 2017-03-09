@@ -9,11 +9,12 @@ This is a JavaScript bot developed using Node.JS which connects to discord via t
 1. Uses REST API to grab Latest Thread
 2. Uses REST API to grab Latest Post
 3. Uses REST API to grab username of aforementioned things, and posts it in discord.
+4. URL Shortener (using https://goo.gl/)
+5. Syncing usernames on Discord with IPB Usernames (currently done with JSON file and a command)
 
 ### To be implemented:
 
-1. URL Shortener
-2. Syncing usernames on discord with IPB usernames
+1. automatic syncing of names.
 
 ### Installation
 
@@ -21,6 +22,12 @@ This is a JavaScript bot developed using Node.JS which connects to discord via t
 2. Download files from github and extract them to wherever you like.
 3. Open Node.JS in your favorite editor eg Notepad++, Sublime, Atom etc.
 4. Edit the following sections and replace them with your own information.
+
+Replace:
+```
+googl.setKey('');
+```
+with your own API from Goo.gl in this section
 
 Replace:
 ```
@@ -54,6 +61,12 @@ with whatever you want the bot to say when a thread/post is posted on the forums
 ![Example Image](http://i.imgur.com/LpNTnTE.png)
 
 Some of the text was removed for security, and because I felt like removing it.
+
+After you've edited the file to suit the needs of your Discord and IPB Forums go to cmd and navigate to the location of your bot. Eg cd C:\Users\<Your Username>\Desktop\Discord-Bot and type npm install goo.gl and npm install fs. After those two are installed you can simply run the bot by typing node bot.js
+
+##### To sync users 
+
+go to your discord channel and type |addNewTag FORUMUSERNAME @discorname What this will do is whenever "FORUMUSERNAME" makes a thread and or post it'll automatically grab the forum username and if it matches with a predistinguished discord name (via the use of the command (|addNewTag FORUMUSERNAME @discorname) it will change FORUMNAME into the discord name.
 
 ### Issues
 
