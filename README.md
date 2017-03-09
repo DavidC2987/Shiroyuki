@@ -17,7 +17,7 @@ This is a JavaScript bot developed using Node.JS which connects to discord via t
 
 ### Installation
 
-1. Download LTS Version of NodeJS from https://nodejs.org/en/
+1. Download LTS Version of NodeJS from [NodeJS](https://nodejs.org/en/)
 2. Download files from github and extract them to wherever you like.
 3. Open Node.JS in your favorite editor eg Notepad++, Sublime, Atom etc.
 4. Edit the following sections and replace them with your own information.
@@ -26,7 +26,7 @@ Replace:
 ```
 var bot = new Eris(""); //This is your discord bot token
 ```
-with your own token which can be gotten from https://discordapp.com/developers/applications/me
+with your own token which can be gotten from [Discord Developers](https://discordapp.com/developers/applications/me)
 
 Replace: 
 
@@ -41,7 +41,7 @@ and leave the password section blank. Otherwise this will not work as the API us
 url: 'https://www.example.com/api/index.php?/forums/topics&sortBy=date&sortDir=desc', //replace example.com with your domain name
 url: 'https://www.example.com/api/index.php?/forums/posts&sortBy=date&sortDir=desc', //replace example.com with your domain name
 ```
-Replace the both of these with your URL to your forum software. The /forums/posts&sortBy=date&sortDir=desc part is the end point (Forums) which allows you to grab Posts, members and Threads. For further documentation on the REST API I recommend you check https://invisionpower.com/4guides/developing-plugins-and-applications/rest-api_370/sending-your-first-request-r167/
+Replace the both of these with your URL to your forum software. The /forums/posts&sortBy=date&sortDir=desc part is the end point (Forums) which allows you to grab Posts, members and Threads. For further documentation on the REST API I recommend you check [IPB4 REST Api](https://invisionpower.com/4guides/developing-plugins-and-applications/rest-api_370/sending-your-first-request-r167/)
 
 Finally replace:
 
