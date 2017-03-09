@@ -70,4 +70,4 @@ go to your discord channel and type |addNewTag FORUMUSERNAME @discorname What th
 
 ### Issues
 
-1. On new thread it does the announcement for "New Thread" and "New Post" which causes it to more or less post the same thing twice.
+1. At the current time: NONE
