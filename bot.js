@@ -1,4 +1,9 @@
 const Eris = require("eris");
+var googl = require('goo.gl');
+var fs = require('fs');
+
+googl.setKey(''); //google API Key
+
 
 var bot = new Eris(""); //This is your discord bot token
 
@@ -25,17 +30,21 @@ var latestThread = {
     title: 'unknown',
     id: -1,
     author: 'unknown',
-    url: 'unknown'
+    url: 'unknown',
+	content: 'none',
+	date: 'none'
 }
 
 var latestPost = {
     id: -1,
     author: 'unknown',
-    url: 'unknown'
+    url: 'unknown',
+	content: 'none',
+	date: 'none'
 }
 
-var forumActivityChannel = ""; //Enter in your forum-activity channel id here.
-var announcementsChannel = ""; //Enter in your announcements channel id here.
+var forumActivityChannel = ""; //Forum-Activity Channel
+var announcementsChannel = ""; //Announcements Channel
 
 var commands = {
     "ping": {
@@ -48,17 +57,46 @@ var commands = {
                 bot.createMessage(msg.channel.id, "(Note) B-baka! This command doesnt need anything else but the command!");
             }
         }
-    }
+    },
+	"addNewTag": {
+		usage: "",
+		hidden: true,
+		process: function (bot, msg, suffix, callback) {
+            var splittedSuffix = suffix.split(" ");
+			if(msg.author.id != "282235475484475392" && msg.author.id != "136256776013086720")
+			{
+				return;
+			}
+			fs.readFile("userTags.json", "utf8", function(err, out) {
+				if (err) {
+					throw err;
+				}
+				var obj = JSON.parse(out);
+				if (!(splittedSuffix[0] in obj)) {
+					obj[splittedSuffix[0]] = {};
+					obj[splittedSuffix[0]].userTag = splittedSuffix[1];
+					console.log(obj[splittedSuffix[0]]);
+					fs.writeFile("userTags.json", JSON.stringify(obj, null, 4), function(err) {
+                    if (err) {
+                        throw err;
+					}
+					bot.createMessage(msg.channel.id, "New user added");
+                    });
+				}
+			});
+        }                               
+	}
 };
 
 
 bot.on("ready", () => {
     console.log("Ready!");
 
+
     ShiroyukiLatestThread();
     ShiroyukiLatestPost();
 
-    setInterval(ShiroyukiLatestThread, 10000);  //Sends a request every ten seconds
+    setInterval(ShiroyukiLatestThread, 9000);  //Sends a request every 9 seconds
     setInterval(ShiroyukiLatestPost, 10000); //Sends a request every ten seconds
 });
 
@@ -129,6 +167,8 @@ function ShiroyukiLatestThread()
         }
 
         var jsonBody = JSON.parse(body);
+		latestThread.date = jsonBody["results"][0]['firstPost']['date'];
+		latestThread.content = jsonBody['results'][0]['firstPost']['content'];
 
         if (jsonBody["results"][0]['id'] != latestThread.id && latestThread.id != -1)
         {
@@ -136,9 +176,10 @@ function ShiroyukiLatestThread()
             latestThread.id = jsonBody["results"][0]['id'];
             latestThread.author = jsonBody["results"][0]['firstPost']['author']['name'];
             latestThread.url = jsonBody["results"][0]['url'];
+
             
             if (jsonBody["results"][0]['forum']['name'] == "Announcements"){
-                AnnounceAnnouncament();
+                AnnounceAnnouncement();
             } else {
                 AnnounceLatestThread();
             }
@@ -163,7 +204,7 @@ function ShiroyukiLatestPost()
 
         var jsonBody = JSON.parse(body);
 
-        if (jsonBody["results"][0]['id'] != latestPost.id && latestPost.id != -1){
+        if (jsonBody["results"][0]['id'] != latestPost.id && latestPost.id != -1 && latestThread.date != jsonBody["results"][0]['date'] && latestThread.content != jsonBody["results"][0]['content']){
             latestPost.id = jsonBody["results"][0]['id'];
             latestPost.author = jsonBody["results"][0]['author']['name'];
             latestPost.url = jsonBody["results"][0]['url'];
@@ -178,17 +219,73 @@ function ShiroyukiLatestPost()
     })
 }
 
-function AnnounceLatestThread(){
-    bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e::regional_indicator_w: :snowflake: :regional_indicator_t: :regional_indicator_h::regional_indicator_r::regional_indicator_e: :regional_indicator_a::regional_indicator_d: \n" + latestThread.url + " by " + latestThread.author );
+function AnnounceLatestThread(link){
+    bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e::regional_indicator_w: :snowflake: :regional_indicator_t: :regional_indicator_h::regional_indicator_r::regional_indicator_e: :regional_indicator_a::regional_indicator_d: \n" + link + " by " + latestThread.author );
+	GetShortLink(latestThread.url, 1)
 }
 
-function AnnounceAnnouncament(){
-    bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e::regional_indicator_w: :snowflake: :regional_indicator_t: :regional_indicator_h::regional_indicator_r::regional_indicator_e: :regional_indicator_a::regional_indicator_d: \n " + latestThread.url + " by " + latestThread.author);
+function AnnounceAnnouncement(link){
+	GetShortLink(latestThread.url, 2)
 }
 
-function AnnounceLatestPost(){
-    bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e: :regional_indicator_w: :snowflake: :regional_indicator_p:  :regional_indicator_o: :regional_indicator_s: :regional_indicator_t: \n" + latestPost.url + " by " + latestPost.author);
+function AnnounceLatestPost(link){
+	GetShortLink(latestPost.url, 3)
 }
+
+
+function GetShortLink(urlToShorten, whatIsShortening) {
+	googl.shorten(urlToShorten)
+		.then(function (shortUrl) {
+			switch(whatIsShortening) {
+				case 1: 
+					fs.readFile("userTags.json", "utf8", function(err, out) {
+						 if (err) {
+							throw err;
+						}
+						var obj = JSON.parse(out);
+						if ((latestThread.author in obj)) {
+							bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e::regional_indicator_w: :snowflake: :regional_indicator_t: :regional_indicator_h::regional_indicator_r::regional_indicator_e: :regional_indicator_a::regional_indicator_d: \n" + shortUrl + " by " + obj[latestThread.author].userTag );
+						} else {
+							bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e::regional_indicator_w: :snowflake: :regional_indicator_t: :regional_indicator_h::regional_indicator_r::regional_indicator_e: :regional_indicator_a::regional_indicator_d: \n" + shortUrl + " by " + latestThread.author );
+						}
+					});
+					break;
+				case 2:
+					fs.readFile("userTags.json", "utf8", function(err, out) {
+						 if (err) {
+							throw err;
+						}
+						var obj = JSON.parse(out);
+						if ((latestThread.author in obj)) {
+							bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e::regional_indicator_w: :snowflake: :regional_indicator_t: :regional_indicator_h::regional_indicator_r::regional_indicator_e: :regional_indicator_a::regional_indicator_d: \n " + shortUrl + " by " +obj[latestThread.author].userTag);
+						} else {
+							bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e::regional_indicator_w: :snowflake: :regional_indicator_t: :regional_indicator_h::regional_indicator_r::regional_indicator_e: :regional_indicator_a::regional_indicator_d: \n " + shortUrl + " by " +latestThread.author);
+						}
+					});
+					break;
+				case 3:
+					fs.readFile("userTags.json", "utf8", function(err, out) {
+						 if (err) {
+							throw err;
+						}
+						var obj = JSON.parse(out);
+						if ((latestPost.author in obj)) {
+							bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e: :regional_indicator_w: :snowflake: :regional_indicator_p:  :regional_indicator_o: :regional_indicator_s: :regional_indicator_t: \n" + shortUrl + " by " + obj[latestPost.author].userTag);
+						} else {
+							bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e: :regional_indicator_w: :snowflake: :regional_indicator_p:  :regional_indicator_o: :regional_indicator_s: :regional_indicator_t: \n" + shortUrl + " by " + latestPost.author);
+						}
+					});
+					break;
+				default: 
+					console.log("GetShortLink() wasn't called properly.");
+					break;
+			}
+		})
+		.catch(function (err) {
+			console.error(err.message);
+	});
+}
+
 
 
 bot.connect(); // Get the bot to connect to Discord
