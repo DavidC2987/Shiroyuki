@@ -65,9 +65,12 @@ bot.on("ready", () => {
 bot.on("messageCreate", (msg) => { // When a message is created
 
     var prefix;
+
     if (msg.channel.type == 1) return;
+
     var guildId = msg.channel.guild.id;
     prefix = "|";
+
     if (msg.author.id != bot.user.id && msg.content.slice(0, prefix.length) == prefix) {
         var cmdTxt = msg.content.split(" ")[0].substring(prefix.length);
         var suffix = msg.content;//.substring(prefix.length+4);
@@ -102,7 +105,7 @@ bot.on("messageCreate", (msg) => { // When a message is created
 
             bot.getDMChannel(msg.author.id).then(privateChannel => {
             bot.createMessage(privateChannel.id, "" + helpArray);
-        });
+            });
 
         } else {
             var cmd = commands[cmdTxt];
@@ -176,15 +179,15 @@ function ShiroyukiLatestPost()
 }
 
 function AnnounceLatestThread(){
-    bot.createMessage(forumActivityChannel, "New thread has been posted! Title: '" + latestThread.title + "' by " + latestThread.author + ' (' + latestThread.url + ')');
+    bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e::regional_indicator_w: :snowflake: :regional_indicator_t: :regional_indicator_h::regional_indicator_r::regional_indicator_e: :regional_indicator_a::regional_indicator_d: \n" + latestThread.url + " by " + latestThread.author );
 }
 
 function AnnounceAnnouncament(){
-    bot.createMessage(forumActivityChannel, "New announcament has been posted! Title: '" + latestThread.title + "' by " + latestThread.author + ' (' + latestThread.url + ')');
+    bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e::regional_indicator_w: :snowflake: :regional_indicator_t: :regional_indicator_h::regional_indicator_r::regional_indicator_e: :regional_indicator_a::regional_indicator_d: \n " + latestThread.url + " by " + latestThread.author);
 }
 
 function AnnounceLatestPost(){
-    bot.createMessage(forumActivityChannel, "New post has been posted! By " + latestPost.author + ' (' + latestPost.url + ')');
+    bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e: :regional_indicator_w: :snowflake: :regional_indicator_p:  :regional_indicator_o: :regional_indicator_s: :regional_indicator_t: \n" + latestPost.url + " by " + latestPost.author);
 }
 
 
