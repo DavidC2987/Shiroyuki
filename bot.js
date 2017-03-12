@@ -1,28 +1,31 @@
 const Eris = require("eris");
 var googl = require('goo.gl');
 var fs = require('fs');
-
-googl.setKey(''); //google API Key
-
-
-var bot = new Eris(""); //This is your discord bot token
-
 var request = require('request')
-var username = '' //enter in your {API Key} here
-var password = '' //Leave this blank
-var options = {
-  url: 'https://www.example.com/api/index.php?/forums/topics&sortBy=date&sortDir=desc', //replace example.com with your domain name
+
+googl.setKey(''); // Your Goo.gl API key.
+var bot = new Eris(""); // Discord bot account token.
+var IPBAPI = ""; // Your Invision Power Board API key. (GET request)
+var forumDomain = "www.example.com"; // Forum domain where Invision Power Board is located.
+var botPrefix = "!"; // Prefix that bot will be called with.
+var postMessage = "New post has been posted!"; // What message will come before linking to to new post.
+var threadMessage = "New thread has been posted!"; // What message will come before linking to to new thread.
+var forumActivityChannel = ""; // Channel where bot will post new threads and new posts.
+var announcamentsChannel = ""; // Channel where bot will post new announcemenets.
+
+var latestThreadRequest = {
+  url: 'https://'+forumDomain+'/api/index.php?/forums/topics&sortBy=date&sortDir=desc',
   auth: {
-    user: username,
-    password: password
+    user: IPBAPI,
+    password: ""
   }
 }
 
-var options2 = {
-  url: 'https://www.example.com/api/index.php?/forums/posts&sortBy=date&sortDir=desc', //replace example.com with your domain name
+var latestPostRequest = {
+  url: 'https://'+forumDomain+'/api/index.php?/forums/posts&sortBy=date&sortDir=desc',
   auth: {
-    user: username,
-    password: password
+    user: IPBAPI,
+    password: ""
   }
 }
 
@@ -43,8 +46,7 @@ var latestPost = {
 	date: 'none'
 }
 
-var forumActivityChannel = ""; //Forum-Activity Channel
-var announcementsChannel = ""; //Announcements Channel
+
 
 var commands = {
     "ping": {
@@ -53,9 +55,6 @@ var commands = {
         process: function (bot, msg, suffix, callback) {
             var t = new Date();
             bot.createMessage(msg.channel.id, "<@" + msg.author.id + "> pong (" + (t.getTime() - msg.timestamp) + "ms)")
-            if (suffix) {
-                bot.createMessage(msg.channel.id, "(Note) B-baka! This command doesnt need anything else but the command!");
-            }
         }
     },
 	"addNewTag": {
@@ -90,28 +89,22 @@ var commands = {
 
 
 bot.on("ready", () => {
-    console.log("Ready!");
 
+    GetLatestThread();
+    GetLatestPost();
 
-    ShiroyukiLatestThread();
-    ShiroyukiLatestPost();
-
-    setInterval(ShiroyukiLatestThread, 9000);  //Sends a request every 9 seconds
-    setInterval(ShiroyukiLatestPost, 10000); //Sends a request every ten seconds
+    setInterval(GetLatestPost, 9000);  //Sends a request every 9 seconds
+    setInterval(GetLatestPost, 10000); //Sends a request every ten seconds
 });
 
-bot.on("messageCreate", (msg) => { // When a message is created
-
-    var prefix;
-
-    if (msg.channel.type == 1) return;
+bot.on("messageCreate", (msg) => {
+    if (msg.channel.type == 1) return; // Bot will not react to messages sent in Direct Messages to avoid errors.
 
     var guildId = msg.channel.guild.id;
-    prefix = "|";
 
-    if (msg.author.id != bot.user.id && msg.content.slice(0, prefix.length) == prefix) {
-        var cmdTxt = msg.content.split(" ")[0].substring(prefix.length);
-        var suffix = msg.content;//.substring(prefix.length+4);
+    if (msg.author.id != bot.user.id && msg.content.slice(0, botPrefix.length) == botPrefix) {
+        var cmdTxt = msg.content.split(" ")[0].substring(botPrefix.length);
+        var suffix = msg.content;
         var asuffix = suffix.split(" ");
         var suffix = asuffix;
         
@@ -126,7 +119,7 @@ bot.on("messageCreate", (msg) => { // When a message is created
             var helpArray = "";
             
             for (var cmd in commands) {
-                var info = prefix + cmd;
+                var info = botPrefix + cmd;
                 var usage = commands[cmd].usage;
                 var description = commands[cmd].description;
                 var hidden = commands[cmd].hidden;
@@ -157,9 +150,9 @@ bot.on("messageCreate", (msg) => { // When a message is created
 
 });
 
-function ShiroyukiLatestThread()
+function GetLatestThread()
 {
-    request(options, function(err, res, body) {
+    request(latestThreadRequest, function(err, res, body) {
         if (err)
         {
             console.dir(err)
@@ -194,9 +187,9 @@ function ShiroyukiLatestThread()
     })
 }
 
-function ShiroyukiLatestPost()
+function GetLatestPost()
 {
-    request(options2, function(err, res, body) {
+    request(latestPostRequest, function(err, res, body) {
         if (err){
             console.dir(err)
             return
@@ -220,8 +213,7 @@ function ShiroyukiLatestPost()
 }
 
 function AnnounceLatestThread(link){
-    bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e::regional_indicator_w: :snowflake: :regional_indicator_t: :regional_indicator_h::regional_indicator_r::regional_indicator_e: :regional_indicator_a::regional_indicator_d: \n" + link + " by " + latestThread.author );
-	GetShortLink(latestThread.url, 1)
+GetShortLink(latestThread.url, 1)
 }
 
 function AnnounceAnnouncement(link){
@@ -244,9 +236,9 @@ function GetShortLink(urlToShorten, whatIsShortening) {
 						}
 						var obj = JSON.parse(out);
 						if ((latestThread.author in obj)) {
-							bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e::regional_indicator_w: :snowflake: :regional_indicator_t: :regional_indicator_h::regional_indicator_r::regional_indicator_e: :regional_indicator_a::regional_indicator_d: \n" + shortUrl + " by " + obj[latestThread.author].userTag );
+							bot.createMessage(forumActivityChannel, threadMessage+"\n" + shortUrl + " by " + obj[latestThread.author].userTag );
 						} else {
-							bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e::regional_indicator_w: :snowflake: :regional_indicator_t: :regional_indicator_h::regional_indicator_r::regional_indicator_e: :regional_indicator_a::regional_indicator_d: \n" + shortUrl + " by " + latestThread.author );
+							bot.createMessage(forumActivityChannel, threadMessage+"\n" + shortUrl + " by " + latestThread.author );
 						}
 					});
 					break;
@@ -257,9 +249,9 @@ function GetShortLink(urlToShorten, whatIsShortening) {
 						}
 						var obj = JSON.parse(out);
 						if ((latestThread.author in obj)) {
-							bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e::regional_indicator_w: :snowflake: :regional_indicator_t: :regional_indicator_h::regional_indicator_r::regional_indicator_e: :regional_indicator_a::regional_indicator_d: \n " + shortUrl + " by " +obj[latestThread.author].userTag);
+							bot.createMessage(forumActivityChannel, threadMessage+"\n " + shortUrl + " by " +obj[latestThread.author].userTag);
 						} else {
-							bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e::regional_indicator_w: :snowflake: :regional_indicator_t: :regional_indicator_h::regional_indicator_r::regional_indicator_e: :regional_indicator_a::regional_indicator_d: \n " + shortUrl + " by " +latestThread.author);
+							bot.createMessage(forumActivityChannel, threadMessage+" \n " + shortUrl + " by " +latestThread.author);
 						}
 					});
 					break;
@@ -270,9 +262,9 @@ function GetShortLink(urlToShorten, whatIsShortening) {
 						}
 						var obj = JSON.parse(out);
 						if ((latestPost.author in obj)) {
-							bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e: :regional_indicator_w: :snowflake: :regional_indicator_p:  :regional_indicator_o: :regional_indicator_s: :regional_indicator_t: \n" + shortUrl + " by " + obj[latestPost.author].userTag);
+							bot.createMessage(forumActivityChannel, postMessage+"\n" + shortUrl + " by " + obj[latestPost.author].userTag);
 						} else {
-							bot.createMessage(forumActivityChannel, ":regional_indicator_n: :regional_indicator_e: :regional_indicator_w: :snowflake: :regional_indicator_p:  :regional_indicator_o: :regional_indicator_s: :regional_indicator_t: \n" + shortUrl + " by " + latestPost.author);
+							bot.createMessage(forumActivityChannel, postMessage+"\n" + shortUrl + " by " + latestPost.author);
 						}
 					});
 					break;
